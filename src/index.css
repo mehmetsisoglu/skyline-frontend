@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: 'Courier New', Courier, monospace; /* Hacker havası için */
+  background-color: #000;
+  color: #fff;
+}
