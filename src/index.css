@@ -8,3 +8,12 @@ body {
   background-color: #000;
   color: #fff;
 }
+
+/* Scrollbar Gizleme (Ama kaydırma çalışır) */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
