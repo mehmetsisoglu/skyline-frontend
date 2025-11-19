@@ -1,17 +1,18 @@
-// src/Dashboard.jsx (v3.0 - $SKYL Token Integration)
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { ShieldAlert, Activity, BrainCircuit, Zap, Terminal, Waves, ArrowRight, Clock, Coins, Rocket } from 'lucide-react';
+import { ShieldAlert, Activity, BrainCircuit, Zap, Terminal, Waves, ArrowRight, Clock, Rocket } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// API URL
+// API URL (Senin Render Backend Adresin)
 const API_BASE = "https://skyairdropbackend-1.onrender.com/api";
 
 export default function Dashboard() {
   const [sentimentData, setSentimentData] = useState(null);
   const [whaleData, setWhaleData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [timeLeft, setTimeLeft] = useState("Calculating...");
 
+  // 1. VERİLERİ ÇEKME (API)
   const fetchData = async () => {
     try {
       const [sentimentRes, whaleRes] = await Promise.all([
@@ -29,8 +30,31 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 30000);
+    const interval = setInterval(fetchData, 30000); // 30 saniyede bir güncelle
     return () => clearInterval(interval);
+  }, []);
+
+  // 2. GERİ SAYIM MANTIĞI (1 Ocak 2026)
+  useEffect(() => {
+    const targetDate = new Date("2026-01-01T00:00:00").getTime();
+
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance < 0) {
+        setTimeLeft("LAUNCHED 🚀");
+      } else {
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        
+        // Örn: 408d 12h 30m
+        setTimeLeft(`${days}d ${hours}h ${minutes}m`);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, []);
 
   if (loading) return (
@@ -41,10 +65,12 @@ export default function Dashboard() {
     </div>
   );
 
+  // Veri Güvenliği
   const meta = sentimentData?.meta || { average_risk: 0, average_sentiment: 0 };
   const news = sentimentData?.data || [];
   const whales = whaleData || [];
 
+  // Yardımcı Fonksiyonlar
   const getRiskColor = (score) => {
     if (score < 30) return "text-green-400 border-green-500/30 bg-green-500/10";
     if (score < 60) return "text-yellow-400 border-yellow-500/30 bg-yellow-500/10";
@@ -57,7 +83,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-[#050505] text-gray-300 p-4 md:p-8 font-sans selection:bg-cyan-500/30">
       
       {/* HEADER */}
-      <header className="max-w-7xl mx-auto mb-8 border-b border-cyan-900/30 pb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+      <header className="max-w-7xl mx-auto mb-8 border-b border-cyan-900/30 pb-6 flex flex-col md:flex-row justify-between items-center gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
             <BrainCircuit className="w-10 h-10 text-cyan-400 animate-pulse" />
@@ -71,26 +97,29 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* $SKYL TOKEN KARTI (YENİ) */}
+        {/* TOKEN BİLGİ KARTLARI */}
         <div className="flex gap-4">
-            <div className="bg-cyan-900/10 border border-cyan-500/30 px-6 py-3 rounded-xl flex flex-col items-center">
-                <span className="text-xs text-cyan-400 font-mono uppercase tracking-widest flex items-center gap-2">
+            {/* FİYAT KARTI */}
+            <div className="bg-cyan-900/10 border border-cyan-500/30 px-6 py-3 rounded-xl flex flex-col items-center shadow-[0_0_15px_rgba(6,182,212,0.1)]">
+                <span className="text-[10px] text-cyan-400 font-mono uppercase tracking-widest flex items-center gap-2 mb-1">
                     <Rocket className="w-3 h-3" /> Pre-Sale Price
                 </span>
-                <span className="text-2xl font-bold text-white">$0.0045</span>
+                <span className="text-2xl font-bold text-white tracking-tight">$0.001</span>
             </div>
-            <div className="bg-purple-900/10 border border-purple-500/30 px-6 py-3 rounded-xl flex flex-col items-center">
-                <span className="text-xs text-purple-400 font-mono uppercase tracking-widest flex items-center gap-2">
-                    <Clock className="w-3 h-3" /> Launch In
+            
+            {/* GERİ SAYIM KARTI */}
+            <div className="bg-purple-900/10 border border-purple-500/30 px-6 py-3 rounded-xl flex flex-col items-center min-w-[160px] shadow-[0_0_15px_rgba(168,85,247,0.1)]">
+                <span className="text-[10px] text-purple-400 font-mono uppercase tracking-widest flex items-center gap-2 mb-1">
+                    <Clock className="w-3 h-3" /> Launch (2026)
                 </span>
-                <span className="text-2xl font-bold text-white">42 Days</span>
+                <span className="text-2xl font-bold text-white font-mono tracking-tight">{timeLeft}</span>
             </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* SOL KOLON */}
+        {/* SOL KOLON: KPI & BALİNALAR */}
         <div className="lg:col-span-1 space-y-6">
           
           {/* Risk Kartı */}
@@ -127,7 +156,7 @@ export default function Dashboard() {
           </motion.div>
 
           {/* BALİNA LİSTESİ */}
-          <div className="bg-[#0A0A0A] border border-gray-800 rounded-2xl overflow-hidden flex flex-col h-[400px]">
+          <div className="bg-[#0A0A0A] border border-gray-800 rounded-2xl overflow-hidden flex flex-col h-[450px]">
             <div className="p-4 border-b border-gray-800 flex items-center gap-2 bg-blue-900/10 shrink-0">
               <Waves className="w-5 h-5 text-blue-400" />
               <h3 className="font-bold text-blue-100 text-sm">LIVE WHALE ALERT (BNB)</h3>
@@ -157,7 +186,7 @@ export default function Dashboard() {
 
         </div>
 
-        {/* SAĞ KOLON */}
+        {/* SAĞ KOLON: HABERLER */}
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
@@ -174,9 +203,9 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="bg-[#0A0A0A] border border-gray-800 hover:border-cyan-900/50 rounded-xl p-4 transition-all group"
+                className="bg-[#0A0A0A] border border-gray-800 hover:border-cyan-900/50 rounded-xl p-5 transition-all group"
               >
-                <div className="flex justify-between items-start mb-2">
+                <div className="flex justify-between items-start mb-3">
                   <div className="flex items-center gap-2">
                     <span className="bg-gray-800 text-gray-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase">
                       {item.news_source}
@@ -190,10 +219,10 @@ export default function Dashboard() {
                   </div>
                 </div>
                 
-                <h3 className="text-base font-semibold text-gray-200 group-hover:text-cyan-400 transition-colors mb-1">
+                <h3 className="text-lg font-semibold text-gray-200 group-hover:text-cyan-400 transition-colors mb-2">
                   {item.headline}
                 </h3>
-                <p className="text-gray-500 text-xs leading-relaxed">
+                <p className="text-gray-500 text-sm leading-relaxed border-l-2 border-gray-800 pl-3">
                   {item.ai_summary}
                 </p>
               </motion.div>
