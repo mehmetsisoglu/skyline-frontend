@@ -1,10 +1,10 @@
-// src/Dashboard.jsx (v2.0 - Whale Watcher Integrated)
+// src/Dashboard.jsx (v3.0 - $SKYL Token Integration)
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { ShieldAlert, Activity, BrainCircuit, Zap, Terminal, Waves, ArrowRight } from 'lucide-react';
+import { ShieldAlert, Activity, BrainCircuit, Zap, Terminal, Waves, ArrowRight, Clock, Coins, Rocket } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// API URL'leri
+// API URL
 const API_BASE = "https://skyairdropbackend-1.onrender.com/api";
 
 export default function Dashboard() {
@@ -12,15 +12,12 @@ export default function Dashboard() {
   const [whaleData, setWhaleData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Verileri Çekme Fonksiyonu
   const fetchData = async () => {
     try {
-      // İki API'den aynı anda veri çek (Sentiment + Balina)
       const [sentimentRes, whaleRes] = await Promise.all([
         axios.get(`${API_BASE}/sentiment`),
         axios.get(`${API_BASE}/whales`)
       ]);
-
       setSentimentData(sentimentRes.data);
       setWhaleData(whaleRes.data);
       setLoading(false);
@@ -32,7 +29,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData();
-    // Her 30 saniyede bir güncelle (Daha canlı hissettirir)
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -45,43 +41,56 @@ export default function Dashboard() {
     </div>
   );
 
-  // Güvenli Veri Erişimi
   const meta = sentimentData?.meta || { average_risk: 0, average_sentiment: 0 };
   const news = sentimentData?.data || [];
   const whales = whaleData || [];
 
-  // Renk Yardımcıları
   const getRiskColor = (score) => {
     if (score < 30) return "text-green-400 border-green-500/30 bg-green-500/10";
     if (score < 60) return "text-yellow-400 border-yellow-500/30 bg-yellow-500/10";
     return "text-red-500 border-red-500/30 bg-red-500/10";
   };
 
-  // Adres Kısaltıcı (0x123...abcd)
   const shortenAddr = (addr) => addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : 'Unknown';
 
   return (
     <div className="min-h-screen bg-[#050505] text-gray-300 p-4 md:p-8 font-sans selection:bg-cyan-500/30">
       
       {/* HEADER */}
-      <header className="max-w-7xl mx-auto mb-8 border-b border-cyan-900/30 pb-6 flex justify-between items-center">
+      <header className="max-w-7xl mx-auto mb-8 border-b border-cyan-900/30 pb-6 flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <BrainCircuit className="w-8 h-8 text-cyan-400 animate-pulse" />
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent tracking-tighter">
+            <BrainCircuit className="w-10 h-10 text-cyan-400 animate-pulse" />
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent tracking-tighter">
               HYPER LOGIC AI
             </h1>
           </div>
           <p className="text-gray-500 font-mono text-xs flex items-center gap-2">
             <span className="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
-            SYSTEM ONLINE • LIVE ON-CHAIN ANALYSIS
+            SYSTEM ONLINE • LIVE MARKET ANALYSIS
           </p>
+        </div>
+
+        {/* $SKYL TOKEN KARTI (YENİ) */}
+        <div className="flex gap-4">
+            <div className="bg-cyan-900/10 border border-cyan-500/30 px-6 py-3 rounded-xl flex flex-col items-center">
+                <span className="text-xs text-cyan-400 font-mono uppercase tracking-widest flex items-center gap-2">
+                    <Rocket className="w-3 h-3" /> Pre-Sale Price
+                </span>
+                <span className="text-2xl font-bold text-white">$0.0045</span>
+            </div>
+            <div className="bg-purple-900/10 border border-purple-500/30 px-6 py-3 rounded-xl flex flex-col items-center">
+                <span className="text-xs text-purple-400 font-mono uppercase tracking-widest flex items-center gap-2">
+                    <Clock className="w-3 h-3" /> Launch In
+                </span>
+                <span className="text-2xl font-bold text-white">42 Days</span>
+            </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* SOL KOLON: KPI & BALİNALAR */}
+        {/* SOL KOLON */}
         <div className="lg:col-span-1 space-y-6">
           
           {/* Risk Kartı */}
@@ -117,13 +126,13 @@ export default function Dashboard() {
              </div>
           </motion.div>
 
-          {/* 🐳 WHALE WATCHER LISTESI (YENİ) */}
-          <div className="bg-[#0A0A0A] border border-gray-800 rounded-2xl overflow-hidden">
-            <div className="p-4 border-b border-gray-800 flex items-center gap-2 bg-blue-900/10">
+          {/* BALİNA LİSTESİ */}
+          <div className="bg-[#0A0A0A] border border-gray-800 rounded-2xl overflow-hidden flex flex-col h-[400px]">
+            <div className="p-4 border-b border-gray-800 flex items-center gap-2 bg-blue-900/10 shrink-0">
               <Waves className="w-5 h-5 text-blue-400" />
               <h3 className="font-bold text-blue-100 text-sm">LIVE WHALE ALERT (BNB)</h3>
             </div>
-            <div className="max-h-[400px] overflow-y-auto scrollbar-hide p-2 space-y-1">
+            <div className="overflow-y-auto scrollbar-hide p-2 space-y-1 flex-1">
               {whales.map((whale, i) => (
                 <motion.div 
                   key={whale.tx_hash || i}
@@ -148,7 +157,7 @@ export default function Dashboard() {
 
         </div>
 
-        {/* SAĞ KOLON: HABERLER */}
+        {/* SAĞ KOLON */}
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
