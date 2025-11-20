@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'; // React olmazsa hata verir
 import axios from 'axios';
 import { ShieldAlert, Activity, BrainCircuit, Zap, Terminal, Waves, ArrowRight, Clock, Rocket, Gift } from 'lucide-react';
 import { motion } from 'framer-motion';
