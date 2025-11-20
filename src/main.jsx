@@ -1,12 +1,10 @@
-// React'ı açıkça import et (Rollup hatasını çözer)
-import React, { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import Dashboard from './Dashboard'
 import './index.css'
-// Uzantıyı kaldır (.jsx yazma, Vite kendisi bulur)
-import Dashboard from './Dashboard' 
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
     <Dashboard />
-  </StrictMode>,
+  </React.StrictMode>,
 )
