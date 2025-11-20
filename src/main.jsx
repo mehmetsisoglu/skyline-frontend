@@ -1,4 +1,4 @@
-// src/main.jsx (Final Configuration for Dashboard URL)
+// src/main.jsx (FINAL CONFIGURATION)
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import Dashboard from './Dashboard'; // Sadece Dashboard'u çağır
