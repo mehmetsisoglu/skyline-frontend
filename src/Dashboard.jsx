@@ -1,46 +1,80 @@
-import React, { useEffect, useState } from 'react'; // React olmazsa hata verir
+// src/Dashboard.jsx (v5.0 - WSS LIVE FEED CLIENT)
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { ShieldAlert, Activity, BrainCircuit, Zap, Terminal, Waves, ArrowRight, Clock, Rocket, Gift } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// API URL (Senin Render Backend Adresin)
-const API_BASE = "https://skyairdropbackend-1.onrender.com/api";
+// Backend Render URL'i (WSS ve API için)
+const API_BASE = "https://skyairdropbackend-1.onrender.com";
+
+// WebSocket URL'i (https yerine wss kullanır)
+const WSS_URL = API_BASE.replace('https', 'wss') + '/whales/live';
 
 export default function Dashboard() {
   const [sentimentData, setSentimentData] = useState(null);
-  const [whaleData, setWhaleData] = useState([]);
+  const [whaleData, setWhaleData] = useState([]); // Yeni veriler buraya eklenecek
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState("Calculating...");
 
-  // 1. VERİLERİ ÇEKME
-  const fetchData = async () => {
+  // 1. API'DEN İLK VERİYİ ÇEKME (Başlangıç ve Cache için)
+  const fetchInitialData = useCallback(async () => {
     try {
-      const [sentimentRes, whaleRes] = await Promise.all([
-        axios.get(`${API_BASE}/sentiment`),
-        axios.get(`${API_BASE}/whales`)
+      const [sentimentRes] = await Promise.all([
+        axios.get(`${API_BASE}/api/sentiment`),
       ]);
       setSentimentData(sentimentRes.data);
-      setWhaleData(whaleRes.data);
       setLoading(false);
     } catch (error) {
-      console.error("Veri hatası:", error);
+      console.error("Initial Data Error:", error);
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 30000); // 30 saniyede bir yenile
-    return () => clearInterval(interval);
   }, []);
 
-  // 2. GERİ SAYIM (1 Ocak 2026)
+  useEffect(() => {
+    fetchInitialData();
+
+    // 2. WSS BAĞLANTISI VE DİNLEME
+    const ws = new WebSocket(WSS_URL);
+    
+    ws.onopen = () => {
+      console.log('WSS Connected. Listening for live whales.');
+      // Bağlandıktan sonra Whale Listesini doldurmak için REST API'den çek
+      axios.get(`${API_BASE}/api/whales`).then(res => setWhaleData(res.data));
+    };
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.type === 'WHALE_ALERT') {
+        const newAlert = {
+            ...message.data,
+            amount: parseFloat(message.data.amount), // String'i sayıya çevir
+            amount_usd: parseFloat(message.data.amount_usd)
+        };
+        
+        // Yeni balinayı listenin başına ekle
+        setWhaleData(prevData => [newAlert, ...prevData.slice(0, 19)]); // Sadece son 20'yi tut
+        
+        // Yeni veri geldiğinde Sentiment'ı de yeniden çek (Daha canlı hissettirir)
+        axios.get(`${API_BASE}/api/sentiment`).then(res => setSentimentData(res.data));
+      }
+    };
+
+    ws.onerror = (error) => console.error('WSS Error:', error);
+    ws.onclose = () => console.warn('WSS Disconnected. Attempting reconnect in 5s.');
+
+    // Komponent unmount olduğunda bağlantıyı kes
+    return () => {
+      ws.close();
+    };
+
+  }, [fetchInitialData]); // fetchInitialData'yı bağımlılıklara ekle
+
+  // ... (Geri Sayım, Render ve Helper fonksiyonları aynı kalır)
   useEffect(() => {
     const targetDate = new Date("2026-01-01T00:00:00").getTime();
     const timer = setInterval(() => {
       const now = new Date().getTime();
       const distance = targetDate - now;
-
       if (distance < 0) {
         setTimeLeft("LAUNCHED 🚀");
       } else {
@@ -49,7 +83,6 @@ export default function Dashboard() {
         setTimeLeft(`${days}d ${hours}h`);
       }
     }, 1000);
-
     return () => clearInterval(timer);
   }, []);
 
@@ -61,19 +94,16 @@ export default function Dashboard() {
     </div>
   );
 
-  // Veri Güvenliği
   const meta = sentimentData?.meta || { average_risk: 0, average_sentiment: 0 };
   const news = sentimentData?.data || [];
   const whales = whaleData || [];
 
-  // Renk Fonksiyonu
   const getRiskColor = (score) => {
     if (score < 30) return "text-green-400 border-green-500/30 bg-green-500/10";
     if (score < 60) return "text-yellow-400 border-yellow-500/30 bg-yellow-500/10";
     return "text-red-500 border-red-500/30 bg-red-500/10";
   };
 
-  // Adres Kısaltma
   const shortenAddr = (addr) => addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : 'Unknown';
 
   return (
