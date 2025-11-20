@@ -7,7 +7,7 @@ import Dashboard from './Dashboard';
 // 2. ADIM: Sizin ORİJİNAL ANA SAYFA bileşenlerinizi içeri al
 // Bu satırları kendi projenin içindeki dosya adlarıyla değiştir.
 // Örneğin: import LandingPage from './LandingPage';
-import HomeComponent from './[SENİN ORİJİNAL ANA SAYFA BİLEŞENİN]'; 
+import HomeComponent from './dashboard'; 
 // Eğer başka sayfaların varsa onları da buraya import etmelisin.
 // import AboutComponent from './[SENİN ORİJİNAL HAKKIMIZDA BİLEŞENİN]';
 
