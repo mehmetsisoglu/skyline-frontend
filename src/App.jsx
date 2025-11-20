@@ -1,30 +1,29 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-// 1. ADIM: Dashboard bileşenini içeri al
+// ==> YENİ: Dashboard'u normal adıyla içeri al
 import Dashboard from './Dashboard'; 
 
-// 2. ADIM: Sizin ORİJİNAL ANA SAYFA bileşenlerinizi içeri al
-// Bu satırları kendi projenin içindeki dosya adlarıyla değiştir.
-// Örneğin: import LandingPage from './LandingPage';
-import HomeComponent from './dashboard'; 
-// Eğer başka sayfaların varsa onları da buraya import etmelisin.
-// import AboutComponent from './[SENİN ORİJİNAL HAKKIMIZDA BİLEŞENİN]';
+// ==> ORİJİNAL ANA SAYFA: Lütfen bu satırı kendi dosyanın adıyla düzelt
+// ÖRNEK: Eğer ana sayfanın kodu Home.jsx ise: import HomeComponent from './Home';
+import HomeComponent from './Home'; // <-- Bu satırı projenin orijinal ana sayfa bileşeninin adıyla değiştirin.
+// Örnek diğer sayfa bileşenini de buraya eklemeyi unutmayın
+// import AboutComponent from './About'; 
+
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Orijinal Ana Sayfa Rotası (skyl.online/) */}
+        {/* Ana Sayfanızın Rotası */}
         <Route path="/" element={<HomeComponent />} />
         
-        {/* Orijinal Diğer Sayfa Rotası (skyl.online/about) */}
-        {/* Eğer varsa bu rotayı koru: <Route path="/about" element={<AboutComponent />} /> */} 
-
-        {/* ==> YENİ: Dashboard Rotası (skyl.online/dashboard) */}
+        {/* Dashboard Rotası */}
         <Route path="/dashboard" element={<Dashboard />} />
         
-        {/* Diğer tüm bilinmeyen yollar için 404 Rotası */}
+        {/* Diğer Rotanız */}
+        {/* <Route path="/about" element={<AboutComponent />} /> */}
+        
         <Route path="*" element={<h1>404 Not Found</h1>} />
       </Routes>
     </Router>
